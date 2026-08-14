@@ -1,0 +1,79 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  body {
+    @apply bg-gentro-white text-gentro-black font-sans;
+  }
+  *::selection {
+    @apply bg-gentro-black text-gentro-white;
+  }
+  *:focus-visible {
+    @apply outline-none ring-2 ring-gentro-black ring-offset-2;
+  }
+}
+
+@layer components {
+  .container-gentro {
+    @apply w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+  .btn-primary {
+    @apply inline-flex items-center justify-center px-8 py-3 bg-gentro-black text-gentro-white text-sm font-medium tracking-wide transition-all duration-300 hover:bg-gentro-charcoal hover:tracking-widest disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  .btn-secondary {
+    @apply inline-flex items-center justify-center px-8 py-3 border border-gentro-black bg-transparent text-gentro-black text-sm font-medium tracking-wide transition-all duration-300 hover:bg-gentro-black hover:text-gentro-white hover:tracking-widest;
+  }
+  .btn-ghost {
+    @apply inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-gentro-midgray transition-colors duration-200 hover:text-gentro-black;
+  }
+  .section-heading {
+    @apply font-display font-semibold text-3xl sm:text-4xl lg:text-5xl tracking-tight text-gentro-black;
+  }
+  .section-subtitle {
+    @apply text-sm uppercase tracking-gentro-wide text-gentro-gray font-medium;
+  }
+  .gentro-wordmark {
+    font-family: 'Space Grotesk', Inter, sans-serif;
+    font-weight: 700;
+    letter-spacing: 0.45em;
+    text-transform: uppercase;
+  }
+  .line-clamp-1 {
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+}
+
+@layer utilities {
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+  }
+}
