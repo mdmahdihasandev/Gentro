@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { NavLink, Link } from 'react-router-dom'
 import { Menu, Search, User, Heart, ShoppingBag } from 'lucide-react'
 import { useApp } from '../../context/AppContext'
-import logo from '../../assets/images/logo.webp'
+import logo from '../../assets/images/main-logo.png'
 
 export default function Navbar() {
   const {
@@ -58,7 +58,7 @@ export default function Navbar() {
             {/* লোগোর জায়গা (এখানে আপনার Logo কম্পোনেন্ট বা img ট্যাগ বসাবেন) */}
             <Link to="/" className="flex items-center">
               
-                <img className='rounded-[50px] w-[80px] h-[80px]' src={logo} alt="Logo" />
+                <img className='rounded-[50px] w-[80px] h-[80px] bg-none' src={logo} alt="Logo" />
              
             </Link>
           </div>

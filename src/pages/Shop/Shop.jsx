@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useSearchParams, Link } from 'react-router-dom'
 import { X, Filter, ChevronDown, Plus, Minus, Star } from 'lucide-react'
-import products from '../../data/products'
+import { useProducts } from '../../hooks/useProducts'
 import categories from '../../data/categories'
 import { useApp } from '../../context/AppContext'
 import ProductCard from '../../components/ui/ProductCard'
@@ -27,6 +27,7 @@ const SORT_OPTIONS = [
 ]
 
 function SidebarContent({
+  products,
   selectedCategories,
   setSelectedCategories,
   priceRange,
@@ -57,7 +58,7 @@ function SidebarContent({
       counts[cat.name] = products.filter((p) => p.category === cat.name).length
     })
     return counts
-  }, [])
+  }, [products])
 
   const toggleCategory = (catName) => {
     setSelectedCategories((prev) =>
@@ -340,6 +341,7 @@ function SidebarContent({
 }
 
 export default function Shop() {
+  const { products } = useProducts()
   const [searchParams, setSearchParams] = useSearchParams()
   const { isFilterDrawerOpen, setIsFilterDrawerOpen } = useApp()
 
@@ -436,6 +438,7 @@ export default function Shop() {
   }
 
   const sidebarProps = {
+    products,
     selectedCategories,
     setSelectedCategories,
     priceRange,

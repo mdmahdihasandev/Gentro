@@ -8,7 +8,7 @@ import {
   Plus,
   Check
 } from 'lucide-react'
-import products from '../../data/products'
+import { useProducts } from '../../hooks/useProducts'
 import { useApp } from '../../context/AppContext'
 import ProductCard from '../../components/ui/ProductCard'
 import Rating from '../../components/ui/Rating'
@@ -109,10 +109,11 @@ export default function ProductDetails() {
   const { id } = useParams()
   const navigate = useNavigate()
   const { addToCart, setIsCartDrawerOpen, toggleWishlist, wishlist } = useApp()
+  const { products, loading } = useProducts()
 
   const product = useMemo(
-    () => products.find((p) => p.id === Number(id)),
-    [id]
+    () => products.find((p) => String(p.id) === String(id)),
+    [id, products]
   )
 
   const [mainImageIndex, setMainImageIndex] = useState(0)
@@ -129,7 +130,11 @@ export default function ProductDetails() {
     return products
       .filter((p) => p.category === product.category && p.id !== product.id)
       .slice(0, 6)
-  }, [product])
+  }, [product, products])
+
+  if (loading) {
+    return <div className="container-gentro py-20 text-center text-gentro-midgray">Loading product...</div>
+  }
 
   if (!product) {
     return (

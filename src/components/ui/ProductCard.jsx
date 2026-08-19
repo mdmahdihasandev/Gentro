@@ -7,16 +7,17 @@ import Rating from './Rating'
 export default function ProductCard({ product }) {
   const navigate = useNavigate()
   const { toggleWishlist, openQuickView, addToCart, wishlist } = useApp()
+   console.log('ProductCard product:', product)
 
   const isInWishlist = wishlist.some((item) => item.id === product.id)
 
-  const badgeType = product.newArrival
-    ? 'NEW'
-    : product.oldPrice && product.oldPrice > product.price
-    ? 'SALE'
-    : product.bestseller
-    ? 'BEST SELLER'
-    : null
+  const badgeType = product.is_new
+  ? 'NEW'
+  : product.old_price && product.old_price > product.price
+  ? 'SALE'
+  : product.bestseller
+  ? 'BEST SELLER'
+  : null
 
   const handleCardClick = () => {
     navigate(`/product/${product.id}`)
@@ -59,21 +60,30 @@ export default function ProductCard({ product }) {
           />
         </button>
 
-        <img
-          src={product.images?.[0]}
+        {/* <img
+         src={product.image}
+        //  src={product.images?.[0]}
           alt={product.name}
           loading="lazy"
           className="absolute inset-0 w-full h-full object-cover transition-all duration-500 ease-out group-hover:scale-105 group-hover:opacity-0"
         />
         {product.images?.[1] && (
           <img
-            src={product.images[1]}
+             src={product.image}
+            //  src={product.images?.[1]}
             alt=""
             aria-hidden="true"
             loading="lazy"
             className="absolute inset-0 w-full h-full object-cover opacity-0 transition-all duration-500 ease-out group-hover:opacity-100 group-hover:scale-105"
           />
-        )}
+        )} */}
+
+        <img
+  src={product.image}
+  alt={product.name}
+  loading="lazy"
+  className="absolute inset-0 w-full h-full object-cover transition-all duration-500 ease-out group-hover:scale-105"
+/>
 
         <div className="absolute inset-x-0 bottom-0 p-3 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out">
           <div className="flex items-center gap-2">
@@ -95,20 +105,36 @@ export default function ProductCard({ product }) {
         </div>
       </div>
 
+
       <div className="pt-4 space-y-1.5">
-        <Rating value={product.rating} showCount count={product.reviews} size="xs" />
+        
+        {/* <Rating value={product.rating} showCount count={product.reviews} size="xs" />
+        <Rating value={product.rating} showCount count={product.review_count} size="xs"/> */}
+
+        <div className="text-xs text-gentro-gray">
+  ⭐ {product.rating} ({product.review_count} reviews)
+</div>
+        
         <h3 className="line-clamp-1 text-sm font-medium text-gentro-black group-hover:text-gentro-midgray transition-colors">
           {product.name}
+          
         </h3>
         <div className="flex items-center gap-2 pt-0.5">
           <span className="text-sm font-semibold text-gentro-black">
             ৳{product.price?.toLocaleString()}
           </span>
-          {product.oldPrice && product.oldPrice > product.price && (
+          {/* {product.oldPrice && product.oldPrice > product.price && (
             <span className="text-xs text-gentro-gray line-through">
               ৳{product.oldPrice?.toLocaleString()}
             </span>
-          )}
+          )} */}
+
+            {product.old_price && product.old_price > product.price && (
+              <span className="text-xs text-gentro-gray line-through">
+                ৳{product.old_price.toLocaleString()}
+              </span>
+            )}
+
         </div>
       </div>
     </div>

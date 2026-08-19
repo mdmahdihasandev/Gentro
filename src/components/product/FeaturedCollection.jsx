@@ -1,10 +1,11 @@
 import { useNavigate } from 'react-router-dom'
 import { ArrowRight } from 'lucide-react'
-import products from '../../data/products'
+import { useProducts } from '../../hooks/useProducts'
 import ProductCard from '../ui/ProductCard'
 
 export default function FeaturedCollection() {
   const navigate = useNavigate()
+  const { products } = useProducts()
   const featuredProducts = products.filter((p) => p.featured).slice(0, 8)
 
   return (

@@ -17,6 +17,7 @@ import {
 } from 'lucide-react'
 import { useApp } from '../../context/AppContext'
 import Button from '../../components/ui/Button'
+import { supabase } from '../../utils/supabase'
 
 const BD_DISTRICTS = [
   'Dhaka', 'Chittagong', 'Sylhet', 'Rajshahi', 'Khulna', 'Barisal',
@@ -56,6 +57,7 @@ export default function Checkout() {
   const [paymentMethod, setPaymentMethod] = useState('cod')
   const [isProcessing, setIsProcessing] = useState(false)
   const [showSuccess, setShowSuccess] = useState(false)
+  const [orderError, setOrderError] = useState('')
   const [orderNumber] = useState(() => `GNT-${Date.now().toString().slice(-8)}`)
 
   const isDhaka = form.city === 'Dhaka'
@@ -90,8 +92,41 @@ export default function Checkout() {
     if (!isFormValid() || cart.length === 0) return
 
     setIsProcessing(true)
-    await new Promise((resolve) => setTimeout(resolve, 1800))
+    setOrderError('')
+
+    const items = cart.map((item) => ({
+      productId: item.productId,
+      name: item.name,
+      qty: item.quantity,
+      price: Number(item.price),
+      size: item.size || '',
+      color: item.color || '',
+      image: item.image || ''
+    }))
+    const { error } = await supabase.from('orders').insert({
+      order_number: orderNumber,
+      customer_name: form.fullName.trim(),
+      email: form.email.trim() || null,
+      phone: form.phone.trim(),
+      address: form.address.trim(),
+      city: form.city,
+      area: form.area.trim() || null,
+      postal_code: form.postalCode.trim() || null,
+      company: form.company.trim() || null,
+      order_note: form.orderNote.trim() || null,
+      items,
+      subtotal,
+      shipping_fee: shipping,
+      discount,
+      total,
+      payment_method: paymentMethod
+    })
     setIsProcessing(false)
+    if (error) {
+      console.error('Unable to save order:', error.message)
+      setOrderError('আপনার অর্ডারটি সংরক্ষণ করা যায়নি। অনুগ্রহ করে আবার চেষ্টা করুন।')
+      return
+    }
     setShowSuccess(true)
     clearCart()
   }
@@ -142,8 +177,8 @@ export default function Checkout() {
             Thank You!
           </h1>
           <p className="text-sm sm:text-base text-gentro-midgray mb-6 leading-relaxed">
-            Your order has been placed successfully. We've sent a confirmation to your
-            email. Our team will contact you shortly to schedule delivery.
+            Your order has been placed successfully. Our team will contact you shortly
+            to schedule delivery.
           </p>
 
           <div className="w-full bg-gentro-offwhite p-5 sm:p-6 mb-8 text-left space-y-3 animate-slide-up">
@@ -472,6 +507,7 @@ export default function Checkout() {
             </section>
 
             <div className="lg:hidden pt-2 space-y-3">
+              {orderError && <p className="text-sm text-red-600">{orderError}</p>}
               <Link
                 to="/cart"
                 className="inline-flex items-center gap-2 text-xs uppercase tracking-wider font-medium text-gentro-black border-b border-gentro-black pb-0.5 hover:border-transparent hover:opacity-70 transition-all"
@@ -555,6 +591,7 @@ export default function Checkout() {
             </div>
 
             <div className="hidden lg:block space-y-3">
+              {orderError && <p className="text-sm text-red-600">{orderError}</p>}
               <Link
                 to="/cart"
                 className="inline-flex items-center gap-2 text-xs uppercase tracking-wider font-medium text-gentro-black border-b border-gentro-black pb-0.5 hover:border-transparent hover:opacity-70 transition-all"

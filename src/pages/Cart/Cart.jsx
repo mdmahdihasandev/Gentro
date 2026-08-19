@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { ChevronLeft, X, Minus, Plus, ShoppingBag, Trash2, Tag } from 'lucide-react'
 import { useApp } from '../../context/AppContext'
 import Button from '../../components/ui/Button'
-import products from '../../data/products'
+import { useProducts } from '../../hooks/useProducts'
 
 const FREE_SHIPPING_THRESHOLD = 5000
 const SHIPPING_DHAKA = 60
@@ -12,6 +12,7 @@ const SHIPPING_OUTSIDE = 120
 export default function Cart() {
   const navigate = useNavigate()
   const { cart, removeFromCart, updateQuantity, clearCart } = useApp()
+  const { products } = useProducts()
   const [couponCode, setCouponCode] = useState('')
   const [couponMessage, setCouponMessage] = useState('')
   const [discount, setDiscount] = useState(0)

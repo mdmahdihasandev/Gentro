@@ -2,11 +2,12 @@ import { useEffect, useRef, useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { Search, X } from 'lucide-react'
 import { useApp } from '../../context/AppContext'
-import products from '../../data/products'
+import { useProducts } from '../../hooks/useProducts'
 import categories from '../../data/categories'
 
 export default function SearchOverlay() {
   const { isSearchOpen, setIsSearchOpen, searchQuery, setSearchQuery } = useApp()
+  const { products } = useProducts()
   const inputRef = useRef(null)
 
   useEffect(() => {
@@ -27,7 +28,7 @@ export default function SearchOverlay() {
     if (!searchQuery.trim()) return []
     const query = searchQuery.toLowerCase()
     return products.filter((p) => p.name.toLowerCase().includes(query))
-  }, [searchQuery])
+  }, [searchQuery, products])
 
   const matchedCategories = useMemo(() => {
     if (!searchQuery.trim()) return []
