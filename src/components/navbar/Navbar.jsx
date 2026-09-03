@@ -69,7 +69,7 @@ export default function Navbar() {
             {/* Logo */}
             <Link to="/" className="flex items-center shrink-0">
               <img 
-                className="h-9 sm:h-11 w-auto object-contain transition-transform duration-300 hover:opacity-90" 
+                className="h-[60px] sm:h-[70px] sm:w-[70px] rounded-[70px] w-[60px] object-contain transition-transform duration-300 hover:opacity-90" 
                 src={logo} 
                 alt="Gentro Logo" 
               />
