@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { NavLink, Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { Menu, Search, User, Heart, ShoppingBag } from 'lucide-react'
 import { useApp } from '../../context/AppContext'
 import logo from '../../assets/images/main-logo.png'
@@ -14,10 +14,12 @@ export default function Navbar() {
   } = useApp()
 
   const [isScrolled, setIsScrolled] = useState(false)
+  const location = useLocation()
 
+  // স্ক্রোল ইফেক্ট
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 10)
+      setIsScrolled(window.scrollY > 20)
     }
     handleScroll()
     window.addEventListener('scroll', handleScroll, { passive: true })
@@ -27,106 +29,117 @@ export default function Navbar() {
   const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0)
   const wishlistCount = wishlist.length
 
-  const navLinkClass = ({ isActive }) =>
-    `text-sm transition-all duration-200 relative group py-1 ${
-      isActive
-        ? 'text-gentro-black font-semibold'
-        : 'text-gentro-midgray hover:text-gentro-black font-medium'
-    }`
+  // একজ্যাক্ট URL চেক করার হেলপার ফাংশন (যাতে ১টি ক্লিক করলে অন্যটি Active না হয়)
+  const isActivePath = (path) => {
+    const currentFullPath = location.pathname + location.search
+    if (path === '/') return currentFullPath === '/'
+    return currentFullPath === path
+  }
+
+  const navItems = [
+    { name: 'Home', path: '/' },
+    { name: 'Shop', path: '/shop' },
+    { name: 'New Arrivals', path: '/shop?filter=new' },
+    { name: 'Collections', path: '/shop?cat=collections' },
+    { name: 'Best Sellers', path: '/shop?filter=bestsellers' },
+    { name: 'About', path: '/about' }
+  ]
 
   return (
     <header
-      className={`sticky top-0 z-40 transition-all duration-300 my-[10px] ${
+      className={`sticky top-0 z-40 transition-all duration-300 ${
         isScrolled
-          ? 'bg-white/90 backdrop-blur-md border-b border-gentro-lightgray shadow-sm'
-          : 'bg-transparent shadow-none'
+          ? 'bg-white/90 backdrop-blur-md border-b border-neutral-200/60 shadow-xs py-2.5'
+          : 'bg-white py-3.5 border-b border-neutral-100'
       }`}
     >
-      <div className="container-gentro px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16 sm:h-20">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-12">
           
-          {/* বাম দিক: মোবাইল মেনু বাটন এবং লোগোর জায়গা */}
-          <div className="flex items-center gap-3">
+          {/* Left: Mobile Menu & Logo */}
+          <div className="flex items-center gap-3 sm:gap-4">
             <button
               onClick={() => setIsMobileMenuOpen(true)}
-              className="lg:hidden p-2 -ml-2 text-gentro-black hover:text-gentro-gray transition-colors duration-200"
+              className="lg:hidden p-1.5 -ml-1 text-neutral-800 hover:text-black transition-colors"
               aria-label="Open menu"
             >
-              <Menu size={22} strokeWidth={2} />
+              <Menu size={22} strokeWidth={1.5} />
             </button>
 
-            {/* লোগোর জায়গা (এখানে আপনার Logo কম্পোনেন্ট বা img ট্যাগ বসাবেন) */}
-            <Link to="/" className="flex items-center">
-              
-                <img className='rounded-[50px] w-[80px] h-[80px] bg-none' src={logo} alt="Logo" />
-             
+            {/* Logo */}
+            <Link to="/" className="flex items-center shrink-0">
+              <img 
+                className="h-9 sm:h-11 w-auto object-contain transition-transform duration-300 hover:opacity-90" 
+                src={logo} 
+                alt="Gentro Logo" 
+              />
             </Link>
           </div>
 
-          {/* মাঝখান: সেন্টার্ড নেভিগেশন লিঙ্কসমূহ */}
-          <nav className="hidden lg:flex items-center gap-8 xl:gap-10 mx-auto">
-            <NavLink to="/" end className={navLinkClass}>
-              Home
-              <span className="absolute -bottom-0.5 left-0 w-0 h-0.5 bg-gentro-black group-hover:w-full transition-all duration-200" />
-            </NavLink>
-            <NavLink to="/shop" className={navLinkClass}>
-              Shop
-              <span className="absolute -bottom-0.5 left-0 w-0 h-0.5 bg-gentro-black group-hover:w-full transition-all duration-200" />
-            </NavLink>
-            <NavLink to="/shop?filter=new" className={navLinkClass}>
-              New Arrivals
-              <span className="absolute -bottom-0.5 left-0 w-0 h-0.5 bg-gentro-black group-hover:w-full transition-all duration-200" />
-            </NavLink>
-            <NavLink to="/shop?cat=collections" className={navLinkClass}>
-              Collections
-              <span className="absolute -bottom-0.5 left-0 w-0 h-0.5 bg-gentro-black group-hover:w-full transition-all duration-200" />
-            </NavLink>
-            <NavLink to="/shop?filter=bestsellers" className={navLinkClass}>
-              Best Sellers
-              <span className="absolute -bottom-0.5 left-0 w-0 h-0.5 bg-gentro-black group-hover:w-full transition-all duration-200" />
-            </NavLink>
-            <NavLink to="/about" className={navLinkClass}>
-              About
-              <span className="absolute -bottom-0.5 left-0 w-0 h-0.5 bg-gentro-black group-hover:w-full transition-all duration-200" />
-            </NavLink>
+          {/* Center: Navigation Links */}
+          <nav className="hidden lg:flex items-center gap-7 xl:gap-9">
+            {navItems.map((item) => {
+              const active = isActivePath(item.path)
+              return (
+                <Link
+                  key={item.name}
+                  to={item.path}
+                  className={`text-[11px] uppercase tracking-[0.18em] transition-all duration-300 relative py-1 ${
+                    active
+                      ? 'text-neutral-950 font-semibold'
+                      : 'text-neutral-500 hover:text-neutral-950 font-medium'
+                  }`}
+                >
+                  {item.name}
+                  <span
+                    className={`absolute bottom-0 left-0 h-[1.5px] bg-neutral-950 transition-all duration-300 ${
+                      active ? 'w-full' : 'w-0 hover:w-full'
+                    }`}
+                  />
+                </Link>
+              )
+            })}
           </nav>
 
-          {/* ডান দিক: সার্চ, একাউন্ট, উইশলিস্ট ও কার্ট আইকন */}
-          <div className="flex items-center gap-1 sm:gap-2">
+          {/* Right: Actions */}
+          <div className="flex items-center gap-0.5 sm:gap-1">
             <button
               onClick={() => setIsSearchOpen(true)}
-              className="p-2 text-gentro-midgray hover:text-gentro-black transition-colors duration-200"
+              className="p-2 text-neutral-700 hover:text-black transition-colors"
               aria-label="Search"
             >
-              <Search size={20} strokeWidth={2} />
+              <Search size={19} strokeWidth={1.5} />
             </button>
+
             <Link
               to="/login"
-              className="hidden sm:block p-2 text-gentro-midgray hover:text-gentro-black transition-colors duration-200"
+              className="hidden sm:block p-2 text-neutral-700 hover:text-black transition-colors"
               aria-label="Account"
             >
-              <User size={20} strokeWidth={2} />
+              <User size={19} strokeWidth={1.5} />
             </Link>
+
             <Link
               to="/wishlist"
-              className="relative p-2 text-gentro-midgray hover:text-gentro-black transition-colors duration-200"
+              className="relative p-2 text-neutral-700 hover:text-black transition-colors"
               aria-label="Wishlist"
             >
-              <Heart size={20} strokeWidth={2} />
+              <Heart size={19} strokeWidth={1.5} />
               {wishlistCount > 0 && (
-                <span className="absolute top-1 right-1 -translate-y-1/2 translate-x-1/2 bg-gentro-black text-white text-[10px] px-1.5 py-0.5 rounded-full min-w-[18px] h-[18px] flex items-center justify-center font-medium leading-none">
+                <span className="absolute top-1 right-1 bg-black text-white text-[9px] font-semibold w-4 h-4 rounded-full flex items-center justify-center leading-none">
                   {wishlistCount > 99 ? '99+' : wishlistCount}
                 </span>
               )}
             </Link>
+
             <button
               onClick={() => setIsCartDrawerOpen(true)}
-              className="relative p-2 text-gentro-midgray hover:text-gentro-black transition-colors duration-200"
+              className="relative p-2 text-neutral-700 hover:text-black transition-colors"
               aria-label="Cart"
             >
-              <ShoppingBag size={20} strokeWidth={2} />
+              <ShoppingBag size={19} strokeWidth={1.5} />
               {cartCount > 0 && (
-                <span className="absolute top-1 right-1 -translate-y-1/2 translate-x-1/2 bg-gentro-black text-white text-[10px] px-1.5 py-0.5 rounded-full min-w-[18px] h-[18px] flex items-center justify-center font-medium leading-none">
+                <span className="absolute top-1 right-1 bg-black text-white text-[9px] font-semibold w-4 h-4 rounded-full flex items-center justify-center leading-none">
                   {cartCount > 99 ? '99+' : cartCount}
                 </span>
               )}

@@ -1,4 +1,4 @@
-import { X } from 'lucide-react'
+import { X, ChevronRight, User, Heart, Package } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useApp } from '../../context/AppContext'
 import GentroLogo from '../common/GentroLogo'
@@ -8,123 +8,104 @@ export default function MobileMenu() {
 
   const closeMenu = () => setIsMobileMenuOpen(false)
 
+  const navLinks = [
+    { name: 'Home', path: '/' },
+    { name: 'Shop', path: '/shop' },
+    { name: 'New Arrivals', path: '/new-arrivals' },
+    { name: 'Collections', path: '/collections' },
+    { name: 'Best Sellers', path: '/best-sellers' },
+    { name: 'About', path: '/about' },
+    { name: 'Contact', path: '/contact' },
+  ]
+
   return (
     <>
+      {/* Backdrop */}
       <div
-        className={`fixed inset-0 z-50 bg-black/60 transition-opacity duration-300 ${
+        className={`fixed inset-0 z-50 bg-black/80 backdrop-blur-md transition-opacity duration-300 ${
           isMobileMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
         }`}
         onClick={closeMenu}
         aria-hidden="true"
       />
+
+      {/* Mobile Drawer Slide-out */}
       <aside
-        className={`fixed top-0 left-0 z-50 h-full w-full max-w-xs bg-gentro-white shadow-2xl flex flex-col transition-transform duration-300 ease-out ${
+        className={`fixed top-0 left-0 z-50 h-full w-full max-w-xs bg-[#0a0a0c] text-white shadow-2xl flex flex-col border-r border-white/10 transition-transform duration-300 ease-in-out ${
           isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
         aria-hidden={!isMobileMenuOpen}
       >
-        <div className="flex items-center justify-between px-5 py-4 border-b border-gentro-lightgray">
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-5 border-b border-white/10 bg-[#0f0f12]">
           <GentroLogo variant="wordmark" size="sm" />
           <button
             onClick={closeMenu}
-            className="p-1.5 text-gentro-midgray hover:text-gentro-black transition-colors"
+            className="p-1.5 text-gray-400 hover:text-white rounded-md hover:bg-white/10 transition-colors"
             aria-label="Close menu"
           >
-            <X size={20} strokeWidth={2} />
+            <X size={18} strokeWidth={2} />
           </button>
         </div>
 
-        <nav className="flex-1 overflow-y-auto px-5 py-6">
+        {/* Navigation */}
+        <nav className="flex-1 overflow-y-auto px-6 py-6 space-y-6">
           <ul className="space-y-1">
-            <li>
-              <Link
-                to="/"
-                onClick={closeMenu}
-                className="block py-3 text-sm font-medium text-gentro-black uppercase tracking-wide border-b border-gentro-offwhite hover:text-gentro-gray transition-colors"
-              >
-                Home
-              </Link>
-            </li>
-            <li>
-              <Link
-                to="/"
-                onClick={closeMenu}
-                className="block py-3 text-sm font-medium text-gentro-black uppercase tracking-wide border-b border-gentro-offwhite hover:text-gentro-gray transition-colors"
-              >
-                Shop
-              </Link>
-            </li>
-            <li>
-              <Link
-                to="/"
-                onClick={closeMenu}
-                className="block py-3 text-sm font-medium text-gentro-black uppercase tracking-wide border-b border-gentro-offwhite hover:text-gentro-gray transition-colors"
-              >
-                New Arrivals
-              </Link>
-            </li>
-            <li>
-              <Link
-                to="/collections"
-                onClick={closeMenu}
-                className="block py-3 text-sm font-medium text-gentro-black uppercase tracking-wide border-b border-gentro-offwhite hover:text-gentro-gray transition-colors"
-              >
-                Collections
-              </Link>
-            </li>
-            <li>
-              <Link
-                to="/"
-                onClick={closeMenu}
-                className="block py-3 text-sm font-medium text-gentro-black uppercase tracking-wide border-b border-gentro-offwhite hover:text-gentro-gray transition-colors"
-              >
-                Best Sellers
-              </Link>
-            </li>
-            <li>
-              <Link
-                to="/about"
-                onClick={closeMenu}
-                className="block py-3 text-sm font-medium text-gentro-black uppercase tracking-wide border-b border-gentro-offwhite hover:text-gentro-gray transition-colors"
-              >
-                About
-              </Link>
-            </li>
-            <li>
-              <Link
-                to="/contact"
-                onClick={closeMenu}
-                className="block py-3 text-sm font-medium text-gentro-black uppercase tracking-wide hover:text-gentro-gray transition-colors"
-              >
-                Contact
-              </Link>
-            </li>
+            {navLinks.map((link) => (
+              <li key={link.name}>
+                <Link
+                  to={link.path}
+                  onClick={closeMenu}
+                  className="flex items-center justify-between py-3.5 text-xs font-semibold uppercase tracking-[0.2em] text-gray-300 hover:text-white hover:pl-2 border-b border-white/5 transition-all duration-300 group"
+                >
+                  <span>{link.name}</span>
+                  <ChevronRight size={14} className="text-gray-600 group-hover:text-white transition-colors" />
+                </Link>
+              </li>
+            ))}
           </ul>
 
-          <div className="mt-10 space-y-3 pt-6 border-t border-gentro-lightgray">
+          {/* Account Quick Links */}
+          <div className="space-y-3 pt-6 border-t border-white/10">
+            <p className="text-[10px] font-bold tracking-[0.2em] text-gray-400 uppercase mb-2">
+              Account & Support
+            </p>
+
             <Link
               to="/login"
               onClick={closeMenu}
-              className="block text-sm text-gentro-midgray hover:text-gentro-black transition-colors"
+              className="flex items-center space-x-3 py-2 text-xs text-gray-300 hover:text-white transition-colors"
             >
-              My Account
+              <User size={15} className="text-gray-400" />
+              <span>My Account</span>
             </Link>
+
             <Link
               to="/wishlist"
               onClick={closeMenu}
-              className="block text-sm text-gentro-midgray hover:text-gentro-black transition-colors"
+              className="flex items-center space-x-3 py-2 text-xs text-gray-300 hover:text-white transition-colors"
             >
-              Wishlist
+              <Heart size={15} className="text-gray-400" />
+              <span>Wishlist</span>
             </Link>
+
             <Link
               to="/login"
               onClick={closeMenu}
-              className="block text-sm text-gentro-midgray hover:text-gentro-black transition-colors"
+              className="flex items-center space-x-3 py-2 text-xs text-gray-300 hover:text-white transition-colors"
             >
-              Track Order
+              <Package size={15} className="text-gray-400" />
+              <span>Track Order</span>
             </Link>
           </div>
         </nav>
+
+        {/* Footer Accent */}
+        <div className="p-6 border-t border-white/10 bg-[#0f0f12] text-center">
+          <p className="text-[10px] tracking-[0.2em] text-gray-400 uppercase">
+            GENTRO • Premium Menswear
+          </p>
+        </div>
       </aside>
     </>
   )

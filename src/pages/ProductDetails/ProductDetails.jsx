@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect, useRef } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import {
   ChevronLeft,
@@ -6,7 +6,9 @@ import {
   Heart,
   Minus,
   Plus,
-  Check
+  Check,
+  X,
+  ZoomIn
 } from 'lucide-react'
 import { useProducts } from '../../hooks/useProducts'
 import { useApp } from '../../context/AppContext'
@@ -117,11 +119,49 @@ export default function ProductDetails() {
   )
 
   const [mainImageIndex, setMainImageIndex] = useState(0)
-  const [selectedColor, setSelectedColor] = useState(product?.colors?.[0] || '')
-  const [selectedSize, setSelectedSize] = useState(product?.sizes?.[0] || '')
+  const [selectedColor, setSelectedColor] = useState('')
+  const [selectedSize, setSelectedSize] = useState('')
   const [quantity, setQuantity] = useState(1)
   const [activeTab, setActiveTab] = useState('description')
   const [isSizeGuideOpen, setIsSizeGuideOpen] = useState(false)
+
+  // Image Zoom State & Ref
+  const [zoomPosition, setZoomPosition] = useState({ x: 0, y: 0 })
+  const [isHovered, setIsHovered] = useState(false)
+  const imageContainerRef = useRef(null)
+
+  // ---- NEW: Lightbox state & ref ----
+  const [isLightboxOpen, setIsLightboxOpen] = useState(false)
+  const [lightboxZoomPos, setLightboxZoomPos] = useState({ x: 50, y: 50 })
+  const [isLightboxHovered, setIsLightboxHovered] = useState(false)
+  const lightboxImageRef = useRef(null)
+
+  // ---- NEW: Thumbnail slider ref ----
+  const thumbScrollRef = useRef(null)
+
+  // Update default state when product changes
+  useEffect(() => {
+    if (product) {
+      setMainImageIndex(0)
+      setSelectedColor(product.colors?.[0] || '')
+      setSelectedSize(product.sizes?.[0] || '')
+      setQuantity(1)
+    }
+  }, [product])
+
+  // ---- NEW: Close lightbox with Escape key ----
+  useEffect(() => {
+    if (!isLightboxOpen) return
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') setIsLightboxOpen(false)
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    document.body.style.overflow = 'hidden'
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown)
+      document.body.style.overflow = ''
+    }
+  }, [isLightboxOpen])
 
   const isInWishlist = wishlist.some((item) => item.id === product?.id)
 
@@ -131,6 +171,34 @@ export default function ProductDetails() {
       .filter((p) => p.category === product.category && p.id !== product.id)
       .slice(0, 6)
   }, [product, products])
+
+  // Handle Mouse Hover Zoom Logic (main image)
+  const handleMouseMove = (e) => {
+    if (!imageContainerRef.current) return
+    const { left, top, width, height } = imageContainerRef.current.getBoundingClientRect()
+    const x = ((e.clientX - left) / width) * 100
+    const y = ((e.clientY - top) / height) * 100
+    setZoomPosition({ x, y })
+  }
+
+  // ---- NEW: Handle Mouse Hover Zoom Logic (lightbox image) ----
+  const handleLightboxMouseMove = (e) => {
+    if (!lightboxImageRef.current) return
+    const { left, top, width, height } = lightboxImageRef.current.getBoundingClientRect()
+    const x = ((e.clientX - left) / width) * 100
+    const y = ((e.clientY - top) / height) * 100
+    setLightboxZoomPos({ x, y })
+  }
+
+  // ---- NEW: Scroll thumbnail slider left/right ----
+  const scrollThumbs = (direction) => {
+    if (!thumbScrollRef.current) return
+    const scrollAmount = 110 // roughly one thumbnail width + gap
+    thumbScrollRef.current.scrollBy({
+      left: direction === 'next' ? scrollAmount : -scrollAmount,
+      behavior: 'smooth'
+    })
+  }
 
   if (loading) {
     return <div className="container-gentro py-20 text-center text-gentro-midgray">Loading product...</div>
@@ -159,11 +227,24 @@ export default function ProductDetails() {
   const images = product.images || []
   const currentImage = images[mainImageIndex] || images[0]
 
-  const prevImage = () => {
+  const prevImage = (e) => {
+    e.stopPropagation()
     setMainImageIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1))
   }
 
-  const nextImage = () => {
+  const nextImage = (e) => {
+    e.stopPropagation()
+    setMainImageIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1))
+  }
+
+  // ---- NEW: prev/next inside lightbox ----
+  const lightboxPrevImage = (e) => {
+    e.stopPropagation()
+    setMainImageIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1))
+  }
+
+  const lightboxNextImage = (e) => {
+    e.stopPropagation()
     setMainImageIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1))
   }
 
@@ -350,27 +431,58 @@ export default function ProductDetails() {
     <div className="container-gentro py-8 sm:py-12">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
         <div className="space-y-4">
-          <div className="relative aspect-[3/4] overflow-hidden bg-gentro-offwhite group">
+          {/* Main Large Image Container with Hover Zoom + Click to open Lightbox */}
+          <div
+            ref={imageContainerRef}
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+            onMouseMove={handleMouseMove}
+            onClick={() => setIsLightboxOpen(true)} // NEW: click to open lightbox
+            className="relative aspect-[3/4] overflow-hidden bg-gentro-offwhite group cursor-zoom-in"
+          >
             {product.oldPrice && product.oldPrice > product.price && product.discount && (
-              <Badge type="SALE" />
+              <div className="absolute top-3 left-3 z-10">
+                <Badge type="SALE" />
+              </div>
             )}
+
             <img
               src={currentImage}
               alt={product.name}
-              className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
+              className={`w-full h-full object-cover transition-transform duration-200 ${
+                isHovered ? 'opacity-0' : 'opacity-100'
+              }`}
             />
+
+            {/* Dynamic Zoomed View */}
+            {isHovered && (
+              <div
+                className="absolute inset-0 bg-no-repeat pointer-events-none transition-all duration-75"
+                style={{
+                  backgroundImage: `url(${currentImage})`,
+                  backgroundPosition: `${zoomPosition.x}% ${zoomPosition.y}%`,
+                  backgroundSize: '250%'
+                }}
+              />
+            )}
+
+            {/* NEW: Zoom hint icon */}
+            <div className="absolute bottom-3 right-3 z-10 w-9 h-9 rounded-full bg-gentro-white/90 backdrop-blur-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+              <ZoomIn size={16} strokeWidth={2} className="text-gentro-black" />
+            </div>
+
             {images.length > 1 && (
               <>
                 <button
                   onClick={prevImage}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center bg-gentro-white/90 backdrop-blur-sm text-gentro-black opacity-0 group-hover:opacity-100 transition-opacity hover:bg-gentro-white focus:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gentro-black"
+                  className="absolute left-3 top-1/2 -translate-y-1/2 z-10 w-10 h-10 flex items-center justify-center bg-gentro-white/90 backdrop-blur-sm text-gentro-black opacity-0 group-hover:opacity-100 transition-opacity hover:bg-gentro-white focus:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gentro-black"
                   aria-label="Previous image"
                 >
                   <ChevronLeft size={20} strokeWidth={2} />
                 </button>
                 <button
                   onClick={nextImage}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center bg-gentro-white/90 backdrop-blur-sm text-gentro-black opacity-0 group-hover:opacity-100 transition-opacity hover:bg-gentro-white focus:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gentro-black"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 z-10 w-10 h-10 flex items-center justify-center bg-gentro-white/90 backdrop-blur-sm text-gentro-black opacity-0 group-hover:opacity-100 transition-opacity hover:bg-gentro-white focus:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gentro-black"
                   aria-label="Next image"
                 >
                   <ChevronRight size={20} strokeWidth={2} />
@@ -378,26 +490,53 @@ export default function ProductDetails() {
               </>
             )}
           </div>
+
+          {/* NEW: Thumbnail Slider (with left/right arrows) */}
           {images.length > 1 && (
-            <div className="flex gap-3 overflow-x-auto snap-x snap-mandatory pb-2 scrollbar-hide">
-              {images.map((img, idx) => (
+            <div className="relative">
+              {images.length > 4 && (
                 <button
-                  key={idx}
-                  onClick={() => setMainImageIndex(idx)}
-                  className={`shrink-0 snap-start w-20 h-24 sm:w-24 sm:h-28 overflow-hidden transition-all focus-visible:outline-none ${
-                    mainImageIndex === idx
-                      ? 'ring-2 ring-gentro-black ring-offset-2'
-                      : 'ring-1 ring-transparent hover:ring-gentro-lightgray'
-                  }`}
+                  onClick={() => scrollThumbs('prev')}
+                  className="absolute -left-2 top-1/2 -translate-y-1/2 z-10 w-7 h-7 rounded-full bg-gentro-white shadow-md flex items-center justify-center text-gentro-black hover:bg-gentro-offwhite transition-colors"
+                  aria-label="Scroll thumbnails left"
                 >
-                  <img
-                    src={img}
-                    alt=""
-                    aria-hidden="true"
-                    className="w-full h-full object-cover"
-                  />
+                  <ChevronLeft size={14} strokeWidth={2} />
                 </button>
-              ))}
+              )}
+
+              <div
+                ref={thumbScrollRef}
+                className="flex gap-3 overflow-x-auto snap-x snap-mandatory pb-2 scrollbar-hide scroll-smooth"
+              >
+                {images.map((img, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => setMainImageIndex(idx)}
+                    className={`shrink-0 snap-start w-20 h-24 sm:w-24 sm:h-28 overflow-hidden transition-all focus-visible:outline-none ${
+                      mainImageIndex === idx
+                        ? 'ring-2 ring-gentro-black ring-offset-2'
+                        : 'ring-1 ring-transparent hover:ring-gentro-lightgray opacity-70 hover:opacity-100'
+                    }`}
+                  >
+                    <img
+                      src={img}
+                      alt=""
+                      aria-hidden="true"
+                      className="w-full h-full object-cover"
+                    />
+                  </button>
+                ))}
+              </div>
+
+              {images.length > 4 && (
+                <button
+                  onClick={() => scrollThumbs('next')}
+                  className="absolute -right-2 top-1/2 -translate-y-1/2 z-10 w-7 h-7 rounded-full bg-gentro-white shadow-md flex items-center justify-center text-gentro-black hover:bg-gentro-offwhite transition-colors"
+                  aria-label="Scroll thumbnails right"
+                >
+                  <ChevronRight size={14} strokeWidth={2} />
+                </button>
+              )}
             </div>
           )}
         </div>
@@ -451,7 +590,7 @@ export default function ProductDetails() {
                 <span className="text-xs text-gentro-midgray">{selectedColor}</span>
               </div>
               <div className="flex flex-wrap gap-3">
-                {product.colors.map((color) => {
+                {product.colors?.map((color) => {
                   const hex = getColorHex(color)
                   const isSelected = selectedColor === color
                   return (
@@ -510,7 +649,7 @@ export default function ProductDetails() {
                 </button>
               </div>
               <div className="flex flex-wrap gap-2">
-                {product.sizes.map((size) => {
+                {product.sizes?.map((size) => {
                   const isSelected = selectedSize === size
                   return (
                     <button
@@ -694,6 +833,90 @@ export default function ProductDetails() {
           </Button>
         </div>
       </Modal>
+
+      {/* ---- NEW: Fullscreen Lightbox ---- */}
+      {isLightboxOpen && (
+        <div
+          className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4 sm:p-8"
+          onClick={() => setIsLightboxOpen(false)}
+        >
+          <button
+            onClick={() => setIsLightboxOpen(false)}
+            className="absolute top-4 right-4 sm:top-6 sm:right-6 z-10 w-11 h-11 flex items-center justify-center rounded-full bg-gentro-white/10 text-gentro-white hover:bg-gentro-white/20 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gentro-white"
+            aria-label="Close"
+          >
+            <X size={22} strokeWidth={2} />
+          </button>
+
+          {images.length > 1 && (
+            <>
+              <button
+                onClick={lightboxPrevImage}
+                className="absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 z-10 w-11 h-11 flex items-center justify-center rounded-full bg-gentro-white/10 text-gentro-white hover:bg-gentro-white/20 transition-colors"
+                aria-label="Previous image"
+              >
+                <ChevronLeft size={24} strokeWidth={2} />
+              </button>
+              <button
+                onClick={lightboxNextImage}
+                className="absolute right-3 sm:right-6 top-1/2 -translate-y-1/2 z-10 w-11 h-11 flex items-center justify-center rounded-full bg-gentro-white/10 text-gentro-white hover:bg-gentro-white/20 transition-colors"
+                aria-label="Next image"
+              >
+                <ChevronRight size={24} strokeWidth={2} />
+              </button>
+            </>
+          )}
+
+          <div
+            ref={lightboxImageRef}
+            onClick={(e) => e.stopPropagation()}
+            onMouseEnter={() => setIsLightboxHovered(true)}
+            onMouseLeave={() => setIsLightboxHovered(false)}
+            onMouseMove={handleLightboxMouseMove}
+            className="relative w-full h-full max-w-3xl max-h-[85vh] overflow-hidden cursor-zoom-in"
+          >
+            <img
+              src={currentImage}
+              alt={product.name}
+              className={`w-full h-full object-contain transition-opacity duration-150 ${
+                isLightboxHovered ? 'opacity-0' : 'opacity-100'
+              }`}
+            />
+            {isLightboxHovered && (
+              <div
+                className="absolute inset-0 bg-no-repeat bg-contain pointer-events-none"
+                style={{
+                  backgroundImage: `url(${currentImage})`,
+                  backgroundPosition: `${lightboxZoomPos.x}% ${lightboxZoomPos.y}%`,
+                  backgroundSize: '200%'
+                }}
+              />
+            )}
+          </div>
+
+          {/* Thumbnail strip inside lightbox */}
+          {images.length > 1 && (
+            <div
+              className="absolute bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 flex gap-2 max-w-[90vw] overflow-x-auto scrollbar-hide px-2"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {images.map((img, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => setMainImageIndex(idx)}
+                  className={`shrink-0 w-12 h-14 sm:w-14 sm:h-16 overflow-hidden transition-all ${
+                    mainImageIndex === idx
+                      ? 'ring-2 ring-gentro-white'
+                      : 'ring-1 ring-gentro-white/30 opacity-60 hover:opacity-100'
+                  }`}
+                >
+                  <img src={img} alt="" className="w-full h-full object-cover" />
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   )
 }

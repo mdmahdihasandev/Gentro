@@ -1,135 +1,98 @@
-import { Shield, Truck, RotateCcw, Lock, Headphones } from 'lucide-react'
+import { ShieldCheck, Truck, RotateCcw, Lock, Headphones } from 'lucide-react'
 
 const benefits = [
   {
-    icon: Shield,
-    title: 'Premium Quality',
-    description:
-      'Crafted with the finest materials and expert craftsmanship for lasting durability.',
+    icon: ShieldCheck,
+    title: '100% Premium Cotton',
+    description: 'Soft, breathable long-staple cotton crafted for long-lasting comfort.',
+    bgColor: 'bg-amber-50 text-amber-700 border-amber-200/60',
+    iconBg: 'bg-amber-100 text-amber-800',
   },
   {
     icon: Truck,
-    title: 'Fast Delivery',
-    description:
-      'Quick and reliable shipping nationwide so you receive your order without delay.',
+    title: 'Express Delivery',
+    description: 'Fast and reliable shipping nationwide right to your doorstep.',
+    bgColor: 'bg-blue-50 text-blue-700 border-blue-200/60',
+    iconBg: 'bg-blue-100 text-blue-800',
   },
   {
     icon: RotateCcw,
-    title: 'Easy Returns',
-    description:
-      'Hassle-free 14-day return policy because your satisfaction is our priority.',
+    title: 'Hassle-Free Returns',
+    description: 'Easy 14-day return & exchange policy for a worry-free purchase.',
+    bgColor: 'bg-emerald-50 text-emerald-700 border-emerald-200/60',
+    iconBg: 'bg-emerald-100 text-emerald-800',
   },
   {
     icon: Lock,
     title: 'Secure Payment',
-    description:
-      'Your transactions are protected with industry-leading encryption and security.',
+    description: '100% safe & encrypted payments through all major providers.',
+    bgColor: 'bg-indigo-50 text-indigo-700 border-indigo-200/60',
+    iconBg: 'bg-indigo-100 text-indigo-800',
   },
   {
     icon: Headphones,
-    title: 'Customer Support',
-    description:
-      'Friendly and knowledgeable support team ready to assist you anytime.',
+    title: 'Dedicated Support',
+    description: 'Friendly support team available to assist with your order anytime.',
+    bgColor: 'bg-rose-50 text-rose-700 border-rose-200/60',
+    iconBg: 'bg-rose-100 text-rose-800',
   },
 ]
 
 export default function WhyGentro() {
   return (
-    <section className="relative overflow-hidden bg-gentro-offwhite py-20 md:py-28">
-      <div className="container-gentro">
-
-        {/* Section Header */}
-        <div className="mx-auto mb-14 max-w-2xl text-center md:mb-20">
-          <div className="mb-4 flex items-center justify-center gap-3">
-            <span className="h-px w-8 bg-gentro-black/30" />
-
-            <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-gray-500">
-              Why Gentro
-            </p>
-
-            <span className="h-px w-8 bg-gentro-black/30" />
-          </div>
-
-          <h2 className="text-3xl font-semibold tracking-tight text-gentro-black md:text-5xl">
-            Built for quality.
+    <section className="py-16 md:py-24 bg-[#FAF9F6]">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        {/* Simple Section Header */}
+        <div className="max-w-2xl mx-auto text-center mb-12 md:mb-16">
+          <span className="text-xs font-semibold tracking-widest uppercase text-slate-500 mb-2 block">
+            Why Choose Gentro
+          </span>
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-slate-900 tracking-tight mb-3">
+            Quality & Comfort You Can Trust
           </h2>
-
-          <p className="mt-4 text-sm leading-7 text-gray-500 md:text-base">
-            Everything we do is focused on delivering quality, reliability,
-            and an effortless shopping experience.
+          <p className="text-sm md:text-base text-slate-600 leading-relaxed">
+            We focus on providing high-quality tailored shirts and an effortless shopping experience.
           </p>
         </div>
 
-        {/* Benefits */}
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 lg:gap-5">
+        {/* Clean Colorful Cards Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5">
           {benefits.map((benefit, index) => {
             const Icon = benefit.icon
 
             return (
               <div
                 key={benefit.title}
-                className="
-                  group relative flex flex-col items-center
-                  rounded-2xl border border-black/[0.06]
-                  bg-gentro-white/70 px-5 py-8 text-center
-                  transition-all duration-300
-                  hover:-translate-y-1
-                  hover:border-black/[0.12]
-                  hover:bg-white
-                  hover:shadow-[0_15px_40px_rgba(0,0,0,0.06)]
-                "
+                className={`
+                  p-6 rounded-xl border bg-white shadow-sm transition-all duration-300
+                  hover:-translate-y-1 hover:shadow-md flex flex-col justify-between
+                `}
               >
-                {/* Number */}
-                <span className="absolute right-4 top-4 text-[10px] font-medium tracking-widest text-gray-300">
-                  0{index + 1}
-                </span>
+                <div>
+                  {/* Top Bar with Icon and Badge */}
+                  <div className="flex items-center justify-between mb-5">
+                    <div className={`p-3 rounded-lg ${benefit.iconBg}`}>
+                      <Icon size={20} strokeWidth={2} />
+                    </div>
+                    <span className={`text-[11px] font-bold px-2 py-0.5 rounded-md border ${benefit.bgColor}`}>
+                      0{index + 1}
+                    </span>
+                  </div>
 
-                {/* Icon */}
-                <div
-                  className="
-                    mb-6 flex h-16 w-16 items-center justify-center
-                    rounded-full border border-black/[0.07]
-                    bg-white text-gentro-black
-                    shadow-[0_5px_20px_rgba(0,0,0,0.04)]
-                    transition-all duration-300
-                    group-hover:scale-105
-                    group-hover:border-black/[0.15]
-                    group-hover:shadow-[0_8px_25px_rgba(0,0,0,0.08)]
-                  "
-                >
-                  <Icon
-                    size={25}
-                    strokeWidth={1.7}
-                  />
+                  {/* Text */}
+                  <h3 className="text-sm font-semibold text-slate-900 mb-2">
+                    {benefit.title}
+                  </h3>
+                  <p className="text-xs text-slate-500 leading-relaxed">
+                    {benefit.description}
+                  </p>
                 </div>
-
-                {/* Title */}
-                <h3
-                  className="
-                    mb-3 text-[13px] font-semibold uppercase
-                    tracking-[0.08em] text-gentro-black
-                  "
-                >
-                  {benefit.title}
-                </h3>
-
-                {/* Description */}
-                <p className="text-[13px] leading-6 text-gray-500">
-                  {benefit.description}
-                </p>
-
-                {/* Bottom Line */}
-                <div
-                  className="
-                    mt-6 h-px w-0 bg-gentro-black/20
-                    transition-all duration-300
-                    group-hover:w-10
-                  "
-                />
               </div>
             )
           })}
         </div>
+
       </div>
     </section>
   )
